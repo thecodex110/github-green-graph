@@ -1,0 +1,34 @@
+name: Auto Daily Green Contribution
+
+on:
+  schedule:
+    # Runs 3 times a day (02:00, 10:00, 18:00 UTC)
+    - cron: '0 2,10,18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make automatic commit
+        run: |
+          git config --global user.name "thecodex110"
+          git config --global user.email "mohdmehndi0316@gmail.com"
+          
+          # Generate 1-3 commits each run
+          NUM_COMMITS=$((RANDOM % 3 + 1))
+          for i in $(seq 1 $NUM_COMMITS); do
+            TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            echo "Automated contribution at $TIMESTAMP (#$i)" >> commit_log.txt
+            git add commit_log.txt
+            git commit -m "chore(green): update contribution graph $TIMESTAMP" || exit 0
+            sleep 1
+          done
+          
+          git push origin main
